@@ -450,7 +450,7 @@ impl TryFrom<&libsql_replication::rpc::proxy::Value> for Value {
 
     fn try_from(value: &libsql_replication::rpc::proxy::Value) -> Result<Self> {
         #[derive(serde::Deserialize)]
-        pub enum BincodeValue {
+        pub enum PostcardValue {
             Null,
             Integer(i64),
             Real(f64),
@@ -459,12 +459,12 @@ impl TryFrom<&libsql_replication::rpc::proxy::Value> for Value {
         }
 
         Ok(
-            match bincode::deserialize::<'_, BincodeValue>(&value.data[..]).map_err(Error::from)? {
-                BincodeValue::Null => Value::Null,
-                BincodeValue::Integer(i) => Value::Integer(i),
-                BincodeValue::Real(x) => Value::Real(x),
-                BincodeValue::Text(s) => Value::Text(s),
-                BincodeValue::Blob(b) => Value::Blob(b),
+            match postcard::from_bytes::<'_, PostcardValue>(&value.data[..]).map_err(Error::from)? {
+                PostcardValue::Null => Value::Null,
+                PostcardValue::Integer(i) => Value::Integer(i),
+                PostcardValue::Real(x) => Value::Real(x),
+                PostcardValue::Text(s) => Value::Text(s),
+                PostcardValue::Blob(b) => Value::Blob(b),
             },
         )
     }

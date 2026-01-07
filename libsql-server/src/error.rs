@@ -244,8 +244,8 @@ impl From<tokio::sync::oneshot::error::RecvError> for Error {
     }
 }
 
-impl From<bincode::Error> for Error {
-    fn from(other: bincode::Error) -> Self {
+impl From<postcard::Error> for Error {
+    fn from(other: postcard::Error) -> Self {
         Self::Internal(other.to_string())
     }
 }
