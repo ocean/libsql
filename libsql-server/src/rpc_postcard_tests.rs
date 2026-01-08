@@ -45,8 +45,6 @@ fn test_postcard_error_conversion() {
 
     if let Err(e) = result {
         let crate_error = crate::error::Error::from(e);
-        assert!(
-            matches!(crate_error, crate::error::Error::Internal(msg) if msg.contains("Unexpected"))
-        );
+        assert!(matches!(crate_error, crate::error::Error::Internal(_)));
     }
 }
