@@ -87,6 +87,8 @@ mod query;
 mod query_analysis;
 mod query_result_builder;
 mod replication;
+#[cfg(test)]
+mod rpc_postcard_tests;
 mod schema;
 mod stats;
 #[cfg(test)]
