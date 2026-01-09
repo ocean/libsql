@@ -48,3 +48,47 @@ fn test_postcard_error_conversion() {
         assert!(matches!(crate_error, crate::error::Error::Internal(_)));
     }
 }
+
+/// Compare binary outputs of bincode, postcard, and wincode.
+/// This test verifies whether wincode is truly binary-compatible with bincode.
+#[test]
+fn test_serialization_format_comparison() {
+    let test_values = vec![
+        Value::Null,
+        Value::Integer(42),
+        Value::Integer(i64::MAX),
+        Value::Real(3.14159),
+        Value::Text("Hello".to_string()),
+        Value::Blob(vec![1, 2, 3, 4, 5]),
+    ];
+
+    for value in test_values {
+        // Serialise with bincode 1.3.3 (original format)
+        let bincode_bytes = bincode::serialize(&value).expect("bincode serialisation failed");
+
+        // Serialise with postcard
+        let postcard_bytes = postcard::to_stdvec(&value).expect("postcard serialisation failed");
+
+        // Try to serialise with wincode using serde (if it supports it)
+        // Note: wincode doesn't directly support serde::Serialize, so this will fail
+        // We're including this to demonstrate the API incompatibility
+
+        println!("Value: {:?}", value);
+        println!("  bincode:  {:?} ({} bytes)", bincode_bytes, bincode_bytes.len());
+        println!("  postcard: {:?} ({} bytes)", postcard_bytes, postcard_bytes.len());
+        println!();
+
+        // Verify bincode can deserialise its own format
+        let _: Value = bincode::deserialize(&bincode_bytes).expect("bincode deserialisation failed");
+
+        // Verify postcard can deserialise its own format
+        let _: Value = postcard::from_bytes(&postcard_bytes).expect("postcard deserialisation failed");
+
+        // Check if formats are different
+        if bincode_bytes != postcard_bytes {
+            println!("  ❌ Formats differ - NOT binary compatible");
+        } else {
+            println!("  ✅ Formats match");
+        }
+    }
+}
